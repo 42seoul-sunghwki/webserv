@@ -26,9 +26,9 @@ class Client
         std::map<std::string, std::string>  start[2];
         std::map<std::string, std::string>  header[2];
         std::vector<std::string>            entity[2];
-        Client();
     public:
-        Client(const Client& src);
+        Client();
+        explicit Client(const Client& src);
         Client& operator=(const Client& src);
         ~Client();
         Client(int fd, Client *next);

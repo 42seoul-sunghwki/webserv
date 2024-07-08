@@ -11,6 +11,14 @@
 /* ************************************************************************** */
 #include "Server.hpp"
 
+void    Server::deleteStart(Client *client)
+{
+    if (client == NULL)
+        return ;
+    deleteStart(client->getNext());
+    free(client);
+}
+
 Server::Server()
 {
     struct sockaddr_in  serverAdr;
@@ -21,8 +29,8 @@ Server::Server()
         errorHandler("socket error.");
     option = 1;
     setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
-    // memset(&serverAdr, 0, sizeof(serverAdr));
-    nullSet(&serverAdr, sizeof(serverAdr));
+    memset(&serverAdr, 0, sizeof(serverAdr));
+    // nullSet(&serverAdr, sizeof(serverAdr));
     serverAdr.sin_family = AF_INET;
     serverAdr.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAdr.sin_port = htons(PORT);
@@ -34,6 +42,7 @@ Server::Server()
     if (kq < 0)
         errorHandler("kqueue error.");
     plusEvent(serverFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+    start = NULL;
 }
 
 Server::Server(const Server& src)
@@ -42,6 +51,7 @@ Server::Server(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
+    this->start = src.getStart();
 }
 
 Server&  Server::operator=(const Server& src)
@@ -50,11 +60,14 @@ Server&  Server::operator=(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
+    this->start = src.getStart();
     return (*this);
 }
 
 Server::~Server()
-{}
+{
+    deleteStart(start);
+}
 
 std::vector<struct kevent>  Server::getFdList(void) const
 {
@@ -74,6 +87,11 @@ int Server::getServerFd(void) const
 int Server::getKq(void) const
 {
     return (kq);
+}
+
+Client  *Server::getStart(void) const
+{
+    return (start);
 }
 
 void    Server::errorHandler(std::string message)
@@ -103,15 +121,28 @@ void    Server::plusEvent(uintptr_t fd, int16_t filter, uint16_t flags, uint32_t
 
 void    Server::plusClient(void)
 {
-    int clntFd;
+    Client              *newClient;
+    Client              *temp;
+    int                 clntFd;
     struct sockaddr_in  clntAdr;
-    socklen_t   adrSize;
+    socklen_t           adrSize;
 
     adrSize = sizeof(clntAdr);
     clntFd = accept(serverFd, (struct sockaddr *)&clntAdr, &adrSize);
     if (clntFd < 0)
         errorHandler("accept error.");
     plusEvent(clntFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+    temp = start;
+    newClient = new Client(clntFd, NULL);
+    newClient->setFd(clntFd);
+    if (temp == NULL)
+        start = newClient;
+    else
+    {
+        while (temp->getNext() != NULL)
+            temp = temp->getNext();
+        temp->setNext(newClient);
+    }
 }
 
 void    Server::mainLoop(void)

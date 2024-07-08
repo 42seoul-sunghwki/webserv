@@ -36,7 +36,9 @@ class Server
         std::map<std::string, std::string>  respond;
         int serverFd;
         int kq;
+        //map으로 바꾸기
         Client  *start;
+        void    deleteStart(Client *client);
     public:
         Server();
         Server(const Server& src);
@@ -47,6 +49,7 @@ class Server
         std::map<std::string, std::string>  getRespond(void) const;
         int getServerFd(void) const;
         int getKq(void) const;
+        Client  *getStart(void) const;
         //Server assistant function
         void    errorHandler(std::string message);
         void    nullSet(void *ptr, size_t len);
