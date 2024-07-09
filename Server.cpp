@@ -21,8 +21,8 @@ Server::Server()
         errorHandler("socket error.");
     option = 1;
     setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
-    // memset(&serverAdr, 0, sizeof(serverAdr));
-    nullSet(&serverAdr, sizeof(serverAdr));
+    memset(&serverAdr, 0, sizeof(serverAdr));
+    // nullSet(&serverAdr, sizeof(serverAdr));
     serverAdr.sin_family = AF_INET;
     serverAdr.sin_addr.s_addr = htonl(INADDR_ANY);
     serverAdr.sin_port = htons(PORT);
@@ -42,6 +42,7 @@ Server::Server(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
+    this->client = src.getClient();
 }
 
 Server&  Server::operator=(const Server& src)
@@ -50,6 +51,7 @@ Server&  Server::operator=(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
+    this->client = src.getClient();
     return (*this);
 }
 
@@ -74,6 +76,11 @@ int Server::getServerFd(void) const
 int Server::getKq(void) const
 {
     return (kq);
+}
+
+std::map<int, Client>  Server::getClient(void) const
+{
+    return (client);
 }
 
 void    Server::errorHandler(std::string message)
@@ -103,15 +110,18 @@ void    Server::plusEvent(uintptr_t fd, int16_t filter, uint16_t flags, uint32_t
 
 void    Server::plusClient(void)
 {
-    int clntFd;
+    int                 clntFd;
     struct sockaddr_in  clntAdr;
-    socklen_t   adrSize;
+    socklen_t           adrSize;
+    Client              newClient;
 
     adrSize = sizeof(clntAdr);
     clntFd = accept(serverFd, (struct sockaddr *)&clntAdr, &adrSize);
     if (clntFd < 0)
         errorHandler("accept error.");
     plusEvent(clntFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
+    newClient.setFd(clntFd);
+    client[clntFd] = newClient;
 }
 
 void    Server::mainLoop(void)
@@ -121,6 +131,8 @@ void    Server::mainLoop(void)
     std::string     str;
     int             count;
     int             readSize;
+    int             sum = 0;
+    const char *temp = "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nContent-Length: ";
 
     count = kevent(kq, &fdList[0], fdList.size(), store, 5, NULL);
     if (count < 0)
@@ -141,24 +153,29 @@ void    Server::mainLoop(void)
                 errorHandler("client error.");
             else if (store[i].filter == EVFILT_READ)
             {
+                std::cout<<"==EVFILT_READ==\n";
                 readSize = read(store[i].ident, buffer, BUFFER_SIZE);
                 if (readSize < 0)
                     errorHandler("clientFd's read error");
                 buffer[readSize] = '\0';
-                write(1, buffer, readSize);
+                //여기서 적어주어야 함
+                client[store[i].ident].setTemp(buffer);
+                // write(1, buffer, readSize);
                 if (readSize < BUFFER_SIZE)
                 {
                     EV_SET(&store[i], store[i].ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
                     plusEvent(store[i].ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+                    client[store[i].ident].showTemp();
+                    // client[store[i].ident].setTemp();
                 }
             }
             else if (store[i].filter == EVFILT_WRITE)
             {
                 //write부분 고치기
                 //write의 성공 및 실패 여부에 따라 바뀌게 짜는 것이 좋을 듯하다. 
-                const char *temp = "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nContent-Length: ";
                 int fd = open("./index.html", O_RDONLY);
-                int sum = 0;
+
+                sum = 0;
                 while (1)
                 {
                     readSize = read(fd, buffer, BUFFER_SIZE);
@@ -182,6 +199,7 @@ void    Server::mainLoop(void)
                 EV_SET(&store[i], store[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
                 close(fd);
                 close(store[i].ident);
+                client.erase(store[i].ident);
             }
         }
     }

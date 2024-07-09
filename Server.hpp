@@ -36,7 +36,7 @@ class Server
         std::map<std::string, std::string>  respond;
         int serverFd;
         int kq;
-        Client  *start;
+        std::map<int, Client>  client;
     public:
         Server();
         Server(const Server& src);
@@ -47,6 +47,7 @@ class Server
         std::map<std::string, std::string>  getRespond(void) const;
         int getServerFd(void) const;
         int getKq(void) const;
+        std::map<int, Client>  getClient(void) const;
         //Server assistant function
         void    errorHandler(std::string message);
         void    nullSet(void *ptr, size_t len);

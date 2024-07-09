@@ -13,7 +13,8 @@ LINE_CLEAR  =   "\x1b[1A\x1b[M"
 
 #-------------------------------------------
 
-SOURCE = ./main.cpp \
+SOURCE = ./Client.cpp \
+		./main.cpp \
 		./Server.cpp
 OBJS = $(SOURCE:.cpp=.o)
 CC = c++
