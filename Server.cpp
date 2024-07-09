@@ -131,6 +131,7 @@ void    Server::mainLoop(void)
     std::string     str;
     int             count;
     int             readSize;
+    int             sum = 0;
 
     count = kevent(kq, &fdList[0], fdList.size(), store, 5, NULL);
     if (count < 0)
@@ -151,12 +152,14 @@ void    Server::mainLoop(void)
                 errorHandler("client error.");
             else if (store[i].filter == EVFILT_READ)
             {
+                std::cout<<"==EVFILT_READ==\n";
                 readSize = read(store[i].ident, buffer, BUFFER_SIZE);
                 if (readSize < 0)
                     errorHandler("clientFd's read error");
                 buffer[readSize] = '\0';
                 //여기서 적어주어야 함
-                write(1, buffer, readSize);
+                client[store[i].ident].setTemp(buffer);
+                // write(1, buffer, readSize);
                 if (readSize < BUFFER_SIZE)
                 {
                     EV_SET(&store[i], store[i].ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
@@ -169,7 +172,9 @@ void    Server::mainLoop(void)
                 //write의 성공 및 실패 여부에 따라 바뀌게 짜는 것이 좋을 듯하다. 
                 const char *temp = "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nContent-Length: ";
                 int fd = open("./index.html", O_RDONLY);
-                int sum = 0;
+
+                client[store[i].ident].showTemp();
+                sum = 0;
                 while (1)
                 {
                     readSize = read(fd, buffer, BUFFER_SIZE);

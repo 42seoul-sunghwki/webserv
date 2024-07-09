@@ -99,6 +99,15 @@ void    Client::setEntity(int i, std::string elem)
     entity[i].push_back(elem);
 }
 
+//temp(must delete)
+void    Client::showTemp(void)
+{
+    std::vector<std::string>::iterator  it;
+
+    for (it = temp.begin(); it != temp.end(); it++)
+        std::cout<<*it;
+}
+
 void    Client::setTemp(std::string str)
 {
     temp.push_back(str);

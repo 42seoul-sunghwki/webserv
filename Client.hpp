@@ -25,6 +25,7 @@ class Client
         std::map<std::string, std::string>  start[2];
         std::map<std::string, std::string>  header[2];
         std::vector<std::string>            entity[2];
+        //temp(must delete)
         std::vector<std::string>            temp;
     public:
         Client();
@@ -45,6 +46,7 @@ class Client
         void    setHeader(int i, std::string first, std::string second);
         void    setEntity(int i, std::string elem);
         //temp(must delete)
+        void    showTemp(void);
         void    setTemp(std::string str);
 };
 
