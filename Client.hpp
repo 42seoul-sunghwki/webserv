@@ -20,31 +20,32 @@
 class Client
 {
     private:
-        int fd;
-        int flag;
-        Client                              *next;
+        int     fd;
+        bool    flag;
         std::map<std::string, std::string>  start[2];
         std::map<std::string, std::string>  header[2];
         std::vector<std::string>            entity[2];
+        std::vector<std::string>            temp;
     public:
         Client();
         explicit Client(const Client& src);
         Client& operator=(const Client& src);
         ~Client();
-        Client(int fd, Client *next);
+        Client(int fd);
         //get function
-        int getFd(void) const;
-        int getFlag(void) const;
-        Client  *getNext() const;
+        int     getFd(void) const;
+        bool    getFlag(void) const;
         std::map<std::string, std::string>  getStart(int i) const;
         std::map<std::string, std::string>  getHeader(int i) const;
         std::vector<std::string>            getEntity(int i) const;
         //set function
         void    setFd(int fd);
-        void    setNext(Client *next);
+        void    setFlag(bool flag);
         void    setStart(int i, std::string first, std::string second);
         void    setHeader(int i, std::string first, std::string second);
         void    setEntity(int i, std::string elem);
+        //temp(must delete)
+        void    setTemp(std::string str);
 };
 
 #endif

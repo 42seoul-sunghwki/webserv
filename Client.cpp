@@ -16,14 +16,12 @@ Client::Client()
 {
     fd = -1;
     flag = 0;
-    next = NULL;
 }
 
 Client::Client(const Client& src)
 {
     fd = src.getFd();
     flag = src.getFlag();
-    next = src.getNext();
     start[0] = src.getStart(0);
     start[1] = src.getStart(1);
     header[0] = src.getHeader(0);
@@ -36,19 +34,19 @@ Client& Client::operator=(const Client& src)
 {
     fd = src.getFd();
     flag = src.getFlag();
-    next = src.getNext();
     start[0] = src.getStart(0);
     start[1] = src.getStart(1);
     header[0] = src.getHeader(0);
     header[1] = src.getHeader(1);
     entity[0] = src.getEntity(0);
     entity[1] = src.getEntity(1);
+    return (*this);
 }
 
 Client::~Client()
 {}
 
-Client::Client(int fd, Client *next) : fd(fd), next(next)
+Client::Client(int fd) : fd(fd)
 {}
 
 int Client::getFd(void) const
@@ -56,14 +54,9 @@ int Client::getFd(void) const
     return (fd);
 }
 
-int Client::getFlag(void) const
+bool    Client::getFlag(void) const
 {
     return (flag);
-}
-
-Client  *Client::getNext() const
-{
-    return (next);
 }
 
 std::map<std::string, std::string>  Client::getStart(int i) const
@@ -83,12 +76,12 @@ std::vector<std::string>            Client::getEntity(int i) const
 
 void    Client::setFd(int fd)
 {
-    fd = fd;
+    this->fd = fd;
 }
 
-void    Client::setNext(Client *next)
+void    Client::setFlag(bool flag)
 {
-    next = next;
+    this->flag = flag;
 }
 
 void    Client::setStart(int i, std::string first, std::string second)
@@ -104,5 +97,10 @@ void    Client::setHeader(int i, std::string first, std::string second)
 void    Client::setEntity(int i, std::string elem)
 {
     entity[i].push_back(elem);
+}
+
+void    Client::setTemp(std::string str)
+{
+    temp.push_back(str);
 }
 

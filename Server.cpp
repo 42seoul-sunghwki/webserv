@@ -11,14 +11,6 @@
 /* ************************************************************************** */
 #include "Server.hpp"
 
-void    Server::deleteStart(Client *client)
-{
-    if (client == NULL)
-        return ;
-    deleteStart(client->getNext());
-    free(client);
-}
-
 Server::Server()
 {
     struct sockaddr_in  serverAdr;
@@ -42,7 +34,6 @@ Server::Server()
     if (kq < 0)
         errorHandler("kqueue error.");
     plusEvent(serverFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-    start = NULL;
 }
 
 Server::Server(const Server& src)
@@ -51,7 +42,7 @@ Server::Server(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
-    this->start = src.getStart();
+    this->client = src.getClient();
 }
 
 Server&  Server::operator=(const Server& src)
@@ -60,14 +51,12 @@ Server&  Server::operator=(const Server& src)
     this->respond = src.getRespond();
     this->serverFd = src.getServerFd();
     this->kq = src.getKq();
-    this->start = src.getStart();
+    this->client = src.getClient();
     return (*this);
 }
 
 Server::~Server()
-{
-    deleteStart(start);
-}
+{}
 
 std::vector<struct kevent>  Server::getFdList(void) const
 {
@@ -89,9 +78,9 @@ int Server::getKq(void) const
     return (kq);
 }
 
-Client  *Server::getStart(void) const
+std::map<int, Client>  Server::getClient(void) const
 {
-    return (start);
+    return (client);
 }
 
 void    Server::errorHandler(std::string message)
@@ -121,28 +110,18 @@ void    Server::plusEvent(uintptr_t fd, int16_t filter, uint16_t flags, uint32_t
 
 void    Server::plusClient(void)
 {
-    Client              *newClient;
-    Client              *temp;
     int                 clntFd;
     struct sockaddr_in  clntAdr;
     socklen_t           adrSize;
+    Client              newClient;
 
     adrSize = sizeof(clntAdr);
     clntFd = accept(serverFd, (struct sockaddr *)&clntAdr, &adrSize);
     if (clntFd < 0)
         errorHandler("accept error.");
     plusEvent(clntFd, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, 0);
-    temp = start;
-    newClient = new Client(clntFd, NULL);
-    newClient->setFd(clntFd);
-    if (temp == NULL)
-        start = newClient;
-    else
-    {
-        while (temp->getNext() != NULL)
-            temp = temp->getNext();
-        temp->setNext(newClient);
-    }
+    newClient.setFd(clntFd);
+    client[clntFd] = newClient;
 }
 
 void    Server::mainLoop(void)
@@ -176,6 +155,7 @@ void    Server::mainLoop(void)
                 if (readSize < 0)
                     errorHandler("clientFd's read error");
                 buffer[readSize] = '\0';
+                //여기서 적어주어야 함
                 write(1, buffer, readSize);
                 if (readSize < BUFFER_SIZE)
                 {
@@ -213,6 +193,7 @@ void    Server::mainLoop(void)
                 EV_SET(&store[i], store[i].ident, EVFILT_WRITE, EV_DELETE, 0, 0, NULL);
                 close(fd);
                 close(store[i].ident);
+                client.erase(store[i].ident);
             }
         }
     }
