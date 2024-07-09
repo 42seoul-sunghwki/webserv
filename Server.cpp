@@ -132,6 +132,7 @@ void    Server::mainLoop(void)
     int             count;
     int             readSize;
     int             sum = 0;
+    const char *temp = "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nContent-Length: ";
 
     count = kevent(kq, &fdList[0], fdList.size(), store, 5, NULL);
     if (count < 0)
@@ -164,16 +165,16 @@ void    Server::mainLoop(void)
                 {
                     EV_SET(&store[i], store[i].ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
                     plusEvent(store[i].ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
+                    client[store[i].ident].showTemp();
+                    // client[store[i].ident].setTemp();
                 }
             }
             else if (store[i].filter == EVFILT_WRITE)
             {
                 //write부분 고치기
                 //write의 성공 및 실패 여부에 따라 바뀌게 짜는 것이 좋을 듯하다. 
-                const char *temp = "HTTP/1.1 200 OK\nContent-Type: text/html;charset=UTF-8\nContent-Length: ";
                 int fd = open("./index.html", O_RDONLY);
 
-                client[store[i].ident].showTemp();
                 sum = 0;
                 while (1)
                 {
