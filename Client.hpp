@@ -21,7 +21,7 @@ class Client
 {
     private:
         int     fd;
-        bool    flag;
+        bool    completion;
         std::map<std::string, std::string>  start[2];
         std::map<std::string, std::string>  header[2];
         std::vector<std::string>            entity[2];
@@ -35,7 +35,7 @@ class Client
         Client(int fd);
         //get function
         int     getFd(void) const;
-        bool    getFlag(void) const;
+        bool    getCompletion(void) const;
         std::map<std::string, std::string>  getStart(int i) const;
         std::map<std::string, std::string>  getHeader(int i) const;
         std::vector<std::string>            getEntity(int i) const;

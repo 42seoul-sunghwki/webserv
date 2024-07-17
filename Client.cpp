@@ -15,13 +15,13 @@
 Client::Client()
 {
     fd = -1;
-    flag = 0;
+    completion = false;
 }
 
 Client::Client(const Client& src)
 {
     fd = src.getFd();
-    flag = src.getFlag();
+    flag = src.getCompletion();
     start[0] = src.getStart(0);
     start[1] = src.getStart(1);
     header[0] = src.getHeader(0);
@@ -33,7 +33,7 @@ Client::Client(const Client& src)
 Client& Client::operator=(const Client& src)
 {
     fd = src.getFd();
-    flag = src.getFlag();
+    flag = src.getCompletion();
     start[0] = src.getStart(0);
     start[1] = src.getStart(1);
     header[0] = src.getHeader(0);
@@ -54,7 +54,7 @@ int Client::getFd(void) const
     return (fd);
 }
 
-bool    Client::getFlag(void) const
+bool    Client::getCompletion(void) const
 {
     return (flag);
 }
