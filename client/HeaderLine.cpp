@@ -89,7 +89,7 @@ int HeaderLine::plus(std::string temp)
     //     temp.erase(temp.size() - 1);
     // std::cout<<temp<<std::endl;
     colon = temp.find(':');
-    //header ㅅㅓ
+    //header key가 여러 개 받을 수 있는 key인지 확인을 할 것 그래서 여러 개 받을 수 있다면 ,로 구분을 진행하고 그렇지 않다면 그냥 push
     if (colon != std::string::npos)
     {
         key = temp.substr(0, colon);
