@@ -58,16 +58,22 @@ void    Client::setFd(int fd)
 
 int Client::setStartLine(void)
 {
-    size_t  flag;
+    size_t      flag;
 
-    msg += message.front();
-    message.pop();
-    flag = msg.find('\n');
+    if (message.size())
+    {
+        msg += message.back();
+        message.pop();
+    }
+    // std::cout<<"msg: "<<msg<<"\n";
+    flag = msg.find("\r\n");
     if (flag != std::string::npos)
     {
+        // std::cout<<"plus msg: "<<msg.substr(0, flag - 1)<<"\n";
         if (startline.plus(msg.substr(0, flag)) < 0)
             return (-1);  //시작줄 에러
-        msg = msg.substr(flag);
+        msg = msg.substr(flag + 2);
+        // std::cout<<"msg: "<<msg<<"\n";
         request.method = startline.getMethod();
         request.url = startline.getUrl();
         request.version = startline.getVersion();
@@ -77,25 +83,31 @@ int Client::setStartLine(void)
 
 int Client::setHeader(void)
 {
-    size_t  flag;
+    size_t      flag;
+    std::string str;
 
-    msg += message.front();
-    message.pop();
+    if (message.size())
+    {
+        msg += message.back();
+        message.pop();
+    }
     while (1)
     {
-        flag = msg.find('\n');
-        if (flag == 0)
+        flag = msg.find("\r\n");
+        if (flag != std::string::npos)
         {
-            headerline.setCompletion(true);
-            msg.substr(flag + 1);
-            request.header = headerline.getHeader();
-            break ;
+            if (flag == 0)
+            {
+                headerline.setCompletion(true);
+                request.header = headerline.getHeader();
+                break ;
+            }
+            if (headerline.plus(msg.substr(0, flag)) < 0)
+                return (-1);  //헤더 에러
+            msg = msg.substr(flag + 2);
         }
-        if (flag == std::string::npos)
+        else
             break ;
-        if (headerline.plus(msg.substr(0, flag)) < 0)
-            return (-1);  //헤더 에러
-        msg.substr(flag + 1);
     }
     return (0);
 }
@@ -108,8 +120,18 @@ void    Client::setEntity(int i, std::string elem)
 //temp(must delete)
 void    Client::showMessage(void)
 {
+    std::vector<std::string>::iterator  itv;
     //request 출력
+    std::cout<<"=====strat line=====\n";
     std::cout<<request.method<<" "<<request.version<<" "<<request.url<<std::endl;
+    std::cout<<"=====header line=====\n";
+    for (std::map<std::string, std::vector<std::string> >::iterator it = request.header.begin(); it != request.header.end(); it++)
+    {
+        std::cout<<it->first<<": ";
+        for (itv = request.header[it->first].begin(); itv != request.header[it->first].end(); itv++)
+            std::cout<<*itv<<"  ";
+        std::cout<<"\n";
+    }
     while (!message.empty())
     {
         std::cout<<message.front();

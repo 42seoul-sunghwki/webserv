@@ -20,9 +20,7 @@ bool    HeaderLine::checkMime(std::string temp)
 
     ans = 0;
     while (std::getline(strStream, str, '/'))
-    {
         ans++;
-    }
     if (ans == 2)
         return (true);
     return (false);
@@ -76,29 +74,39 @@ void    HeaderLine::setCompletion(bool temp)
 
 int HeaderLine::plus(std::string temp)
 {
-    size_t  colon;
-    int     pos;
+    std::string str;
+    size_t      colon;
+    int         pos;
 
+    // std::cout<<temp<<std::endl;
     pos = temp.find_first_not_of(' ');
     temp.erase(0, pos);
     pos = temp.find_last_not_of(' ');
     temp.erase(pos + 1);
     if (temp.size() == 0)
         return (-1);  //공백만 들어온 상황
-    if (temp[temp.size() - 1] == ',')
-        temp.erase(temp.size() - 1);
+    // if (temp[temp.size() - 1] == ',')
+    //     temp.erase(temp.size() - 1);
+    // std::cout<<temp<<std::endl;
     colon = temp.find(':');
+    //header ㅅㅓ
     if (colon != std::string::npos)
     {
         key = temp.substr(0, colon);
+        // std::cout<<"key: "<<key;
         value.clear();
-        value = temp.substr(colon);
-        header[key].push_back(value);
+        value = temp.substr(colon + 1);
+        pos = value.find_first_not_of(' ');
+        value.erase(0, pos);
+        pos = value.find_last_not_of(' ');
+        value.erase(pos + 1);
+        header[key].push_back(str);
     }
     else
     {
         if (key.size() == 0 && !checkMime(temp))
             return (-2);  //message/htpp타입이 아닌데 obs-fold를 사용한 상황
+        value = temp;
         header[key].push_back(value);
     }
     return (0);

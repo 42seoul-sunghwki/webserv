@@ -85,7 +85,8 @@ int     StartLine::plus(std::string temp)
     int                 answer;
 
     answer = 0;
-    while (std::getline(strStream, str, ' '))
+    // std::cout<<temp<<std::endl;
+    while (getline(strStream, str, ' '))
     {
         if (answer > 2)
             return (-4);
@@ -95,16 +96,20 @@ int     StartLine::plus(std::string temp)
                 method = originMethod[str];
                 if (method == 0)
                     return (-1);
+                // std::cout<<str<<": "<<method<<"\n";
                 break ;
             case 1:
-                if (str == "\0")
+                if (str.empty())
                     return (-2);
                 url = str;
+                // std::cout<<str<<": "<<url<<"\n";
                 break ;
             case 2:
                 version = originVersion[str];
+                // std::cout<<str<<": "<<version<<std::endl;
                 if (version == 0)
                     return (-3);
+                // std::cout<<str<<": "<<version<<std::endl;
                 break ;
             default:
                 break ;
