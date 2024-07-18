@@ -10,12 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Server.hpp"
+#include "./server/Server.hpp"
 
 int main(void)
 {
     Server  server;
 
+    std::ios::sync_with_stdio(false);
     while (1)
         server.mainLoop();
 }

@@ -13,9 +13,11 @@ LINE_CLEAR  =   "\x1b[1A\x1b[M"
 
 #-------------------------------------------
 
-SOURCE = ./Client.cpp \
-		./main.cpp \
-		./Server.cpp
+SOURCE = ./client/Client.cpp \
+		./client/HeaderLine.cpp \
+		./client/StartLine.cpp \
+		./server/Server.cpp \
+		./main.cpp
 OBJS = $(SOURCE:.cpp=.o)
 CC = c++
 FLAGS = -Wall -Wextra -Werror -std=c++98 -c
