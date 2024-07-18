@@ -153,19 +153,19 @@ void    Server::mainLoop(void)
                 errorHandler("client error.");
             else if (store[i].filter == EVFILT_READ)
             {
-                std::cout<<"==EVFILT_READ==\n";
+                // std::cout<<"==EVFILT_READ==\n";
                 readSize = read(store[i].ident, buffer, BUFFER_SIZE);
                 if (readSize < 0)
                     errorHandler("clientFd's read error");
                 buffer[readSize] = '\0';
                 //여기서 적어주어야 함
-                client[store[i].ident].setTemp(buffer);
+                client[store[i].ident].setMessage(buffer);
                 // write(1, buffer, readSize);
                 if (readSize < BUFFER_SIZE)
                 {
                     EV_SET(&store[i], store[i].ident, EVFILT_READ, EV_DELETE, 0, 0, NULL);
                     plusEvent(store[i].ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, 0);
-                    client[store[i].ident].showTemp();
+                    client[store[i].ident].showMessage();
                     // client[store[i].ident].setTemp();
                 }
             }

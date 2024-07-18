@@ -13,7 +13,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-#include "Client.hpp"
+#include "../client/Client.hpp"
 #include <sys/event.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -25,8 +25,8 @@
 #include <string>
 #include <arpa/inet.h>
 
-# define BUFFER_SIZE 30
-# define PORT 8000
+# define BUFFER_SIZE 4096
+# define PORT 8080
 # define EVENTCNT 5
 
 class Server

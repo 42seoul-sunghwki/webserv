@@ -13,20 +13,33 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-#include <iostream>
-#include <map>
-#include <vector>
+# include "StartLine.hpp"
+# include "HeaderLine.hpp"
+// # include <iostream> 
+// # include <map>
+# include <vector>
+# include <queue>
+
+typedef struct Request
+{
+    bool    fin;
+    Method  method;
+    Version version;
+    std::string url;
+    std::map<std::string, std::vector<std::string> >  header;
+}   Request;
 
 class Client
 {
     private:
-        int     fd;
-        bool    completion;
-        std::map<std::string, std::string>  start[2];
-        std::map<std::string, std::string>  header[2];
+        int         fd;
+        std::string msg;
+        Request     request;
+        StartLine   startline;
+        HeaderLine  headerline;
         std::vector<std::string>            entity[2];
         //temp(must delete)
-        std::vector<std::string>            temp;
+        std::queue<std::string>            message;
     public:
         Client();
         explicit Client(const Client& src);
@@ -34,20 +47,18 @@ class Client
         ~Client();
         Client(int fd);
         //get function
-        int     getFd(void) const;
-        bool    getCompletion(void) const;
-        std::map<std::string, std::string>  getStart(int i) const;
-        std::map<std::string, std::string>  getHeader(int i) const;
+        int         getFd(void) const;
+        StartLine   getStartLine(void) const;
         std::vector<std::string>            getEntity(int i) const;
         //set function
         void    setFd(int fd);
-        void    setFlag(bool flag);
-        void    setStart(int i, std::string first, std::string second);
-        void    setHeader(int i, std::string first, std::string second);
+        int     setStartLine(void);
+        int     setHeaderUtil(std::string temp);
+        int     setHeader(void);
         void    setEntity(int i, std::string elem);
         //temp(must delete)
-        void    showTemp(void);
-        void    setTemp(std::string str);
+        void    showMessage(void);
+        void    setMessage(std::string str);
 };
 
 #endif
