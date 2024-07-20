@@ -49,7 +49,7 @@ bool    HeaderLine::checkMime(std::string temp)
     return (false);
 }
 
-void    HeaderLine::pushValue()
+int HeaderLine::pushValue()
 {
     std::vector<std::string>::iterator  it;
     std::istringstream                  strStream(value);
@@ -71,7 +71,12 @@ void    HeaderLine::pushValue()
         }
     }
     else
+    {
+        if (!header[key].empty())
+            return (-1);
         header[key].push_back(value);
+    }
+    return (0);
 }
 
 HeaderLine::HeaderLine() : completion(false)
@@ -153,7 +158,8 @@ int HeaderLine::plus(std::string temp)
         pos = value.find_last_not_of(' ');
         value.erase(pos + 1);
         // std::cout<<"key: "<<key;
-        pushValue();
+        if (pushValue() < 0)
+            return (-2);
         // header[key].push_back(str);
     }
     else
@@ -161,7 +167,8 @@ int HeaderLine::plus(std::string temp)
         if (key.size() == 0 && !checkMime(temp))
             return (-2);  //message/htpp타입이 아닌데 obs-fold를 사용한 상황
         value = temp;
-        pushValue();
+        if (pushValue() < 0)
+            return (-2);
     }
     return (0);
 }

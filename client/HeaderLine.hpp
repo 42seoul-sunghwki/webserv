@@ -35,7 +35,7 @@ class HeaderLine
         std::string value;
         std::map<std::string, std::vector<std::string> > header;
         bool    checkMime(std::string temp);
-        void    pushValue();
+        int     pushValue();
     public:
         static std::vector<std::string> manyHeader;
         static std::vector<std::string> vitalHeader;
