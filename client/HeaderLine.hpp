@@ -17,6 +17,7 @@
 # include <vector>
 # include <map>
 # include <sstream>
+# include <algorithm>
 
 class HeaderLine
 {
@@ -26,8 +27,10 @@ class HeaderLine
         std::string key;
         std::string value;
         std::map<std::string, std::vector<std::string> > header;
-        bool        checkMime(std::string temp);
+        bool    checkMime(std::string temp);
+        void    pushValue();
     public:
+        static std::vector<std::string>  manyHeader;
         HeaderLine();
         HeaderLine(const HeaderLine& src);
         ~HeaderLine();
