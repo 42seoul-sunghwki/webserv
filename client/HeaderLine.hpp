@@ -31,7 +31,6 @@ class HeaderLine
     private:
         bool        completion;
         ENTITYTYPE  entitytype;
-        std::string str;
         std::string key;
         std::string value;
         std::map<std::string, std::vector<std::string> > header;

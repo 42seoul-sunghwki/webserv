@@ -33,6 +33,7 @@ std::vector<std::string>    vitalHeaderInit()
 }
 
 std::vector<std::string> HeaderLine::manyHeader = manyHeaderInit();
+std::vector<std::string> HeaderLine::vitalHeader = vitalHeaderInit();
 
 bool    HeaderLine::checkMime(std::string temp)
 {
@@ -79,6 +80,7 @@ HeaderLine::HeaderLine() : completion(false)
 HeaderLine::HeaderLine(const HeaderLine& src)
 {
     completion = src.getCompletion();
+    entitytype = src.getEntitytype();
     key = src.getKey();
     value = src.getValue();
     header = src.getHeader();
@@ -88,6 +90,7 @@ HeaderLine::~HeaderLine() {}
 
 HeaderLine& HeaderLine::operator=(const HeaderLine& src)
 {
+    entitytype = src.getEntitytype();
     completion = src.getCompletion();
     key = src.getKey();
     value = src.getValue();
