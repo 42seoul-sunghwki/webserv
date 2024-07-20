@@ -24,6 +24,7 @@ std::vector<std::string>    manyHeaderInit()
     return (v);
 }
 
+//꼭 필요한 헤더들
 std::vector<std::string>    vitalHeaderInit()
 {
     std::vector<std::string>    v;
@@ -79,13 +80,15 @@ int HeaderLine::pushValue()
     return (0);
 }
 
-HeaderLine::HeaderLine() : completion(false)
+HeaderLine::HeaderLine() : completion(false), te(NOT)
 {}
 
 HeaderLine::HeaderLine(const HeaderLine& src)
 {
     completion = src.getCompletion();
+    te = src.getTe();
     entitytype = src.getEntitytype();
+    contentLength = src.getContentLength();
     key = src.getKey();
     value = src.getValue();
     header = src.getHeader();
@@ -96,7 +99,9 @@ HeaderLine::~HeaderLine() {}
 HeaderLine& HeaderLine::operator=(const HeaderLine& src)
 {
     entitytype = src.getEntitytype();
+    te = src.getTe();
     completion = src.getCompletion();
+    contentLength = src.getContentLength();
     key = src.getKey();
     value = src.getValue();
     header = src.getHeader();
@@ -111,6 +116,11 @@ bool    HeaderLine::getCompletion() const
 ENTITYTYPE  HeaderLine::getEntitytype() const
 {
     return (entitytype);
+}
+
+int HeaderLine::getContentLength() const
+{
+    return (contentLength);
 }
 
 std::string HeaderLine::getKey() const
@@ -130,6 +140,11 @@ std::map<std::string, std::vector<std::string> > HeaderLine::getHeader() const
 void    HeaderLine::setCompletion(bool temp)
 {
     completion = temp;
+}
+
+void    HeaderLine::setContentLength(int minus)
+{
+    contentLength -= minus;
 }
 
 int HeaderLine::plus(std::string temp)
@@ -190,7 +205,7 @@ int HeaderLine::headerError()
         entitytype = TRANSFER;
         itm = header.find("Transfer-Encoding");
         if (itm == header.end())
-            entitytype = NOT;
+            entitytype = ENOT;
     }
     else
     {
@@ -198,10 +213,12 @@ int HeaderLine::headerError()
         itm = header.find("Transfer-Encoding");
         if (itm != header.end())
         {
-            entitytype = NOT;
+            entitytype = ENOT;
             return (-2);
         }
     }
+    itm = header.find("Trailer");
+    if (itm != header.end())
+        te = YES;
     return (0);
 }
-

@@ -23,6 +23,12 @@ enum    ENTITYTYPE
 {
     CONTENT = 1,
     TRANSFER,
+    ENOT
+};
+
+enum    TE
+{
+    YES = 1,
     NOT
 };
 
@@ -30,10 +36,13 @@ class HeaderLine
 {
     private:
         bool        completion;
+        TE          te;
         ENTITYTYPE  entitytype;
+        int         contentLength;
         std::string key;
         std::string value;
         std::map<std::string, std::vector<std::string> > header;
+        std::vector<std::string>    teHeader;
         bool    checkMime(std::string temp);
         int     pushValue();
     public:
@@ -45,12 +54,15 @@ class HeaderLine
         HeaderLine& operator=(const HeaderLine& src);
         //get function
         bool        getCompletion() const;
+        TE          getTe() const;
         ENTITYTYPE  getEntitytype() const;
+        int         getContentLength() const;
         std::string getKey() const;
         std::string getValue() const;
         std::map<std::string, std::vector<std::string> > getHeader() const;
         //set function
         void    setCompletion(bool temp);
+        void    setContentLength(int minus);
         //logic
         int plus(std::string temp);
         int headerError();

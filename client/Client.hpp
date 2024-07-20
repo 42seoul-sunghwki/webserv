@@ -15,9 +15,9 @@
 
 # include "StartLine.hpp"
 # include "HeaderLine.hpp"
+# include "EntityLine.hpp"
 // # include <iostream> 
 // # include <map>
-# include <vector>
 # include <queue>
 
 typedef struct Request
@@ -37,9 +37,9 @@ class Client
         Request     request;
         StartLine   startline;
         HeaderLine  headerline;
-        std::vector<std::string>            entity[2];
+        EntityLine  entityline;
         //temp(must delete)
-        std::queue<std::string>            message;
+        std::queue<std::string>     message;
     public:
         Client();
         explicit Client(const Client& src);
@@ -47,15 +47,20 @@ class Client
         ~Client();
         Client(int fd);
         //get function
-        int         getFd(void) const;
-        StartLine   getStartLine(void) const;
-        std::vector<std::string>            getEntity(int i) const;
+        int                         getFd() const;
+        std::string                 getMsg() const;
+        Request                     getRequest() const;
+        StartLine                   getStartLine() const;
+        HeaderLine                  getHeaderline() const;
+        EntityLine                  getEntity() const;
+        std::queue<std::string>     getMessage() const;
+        bool                        getRequestFin() const;
         //set function
         void    setFd(int fd);
         int     setStartLine(void);
         int     setHeaderUtil(std::string temp);
         int     setHeader(void);
-        void    setEntity(int i, std::string elem);
+        int     setEntityLine(void);
         //temp(must delete)
         void    showMessage(void);
         void    setMessage(std::string str);
