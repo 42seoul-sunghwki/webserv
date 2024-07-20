@@ -19,10 +19,18 @@
 # include <sstream>
 # include <algorithm>
 
+enum    ENTITYTYPE 
+{
+    CONTENT = 1,
+    TRANSFER,
+    NOT
+};
+
 class HeaderLine
 {
     private:
         bool        completion;
+        ENTITYTYPE  entitytype;
         std::string str;
         std::string key;
         std::string value;
@@ -30,19 +38,23 @@ class HeaderLine
         bool    checkMime(std::string temp);
         void    pushValue();
     public:
-        static std::vector<std::string>  manyHeader;
+        static std::vector<std::string> manyHeader;
+        static std::vector<std::string> vitalHeader;
         HeaderLine();
         HeaderLine(const HeaderLine& src);
         ~HeaderLine();
         HeaderLine& operator=(const HeaderLine& src);
         //get function
         bool        getCompletion() const;
+        ENTITYTYPE  getEntitytype() const;
         std::string getKey() const;
         std::string getValue() const;
         std::map<std::string, std::vector<std::string> > getHeader() const;
         //set function
         void    setCompletion(bool temp);
+        //logic
         int plus(std::string temp);
+        int headerError();
 };
 
 #endif

@@ -31,7 +31,9 @@ Client& Client::operator=(const Client& src)
 }
 
 Client::~Client()
-{}
+{
+    std::cout<<"client close"<<std::endl;
+}
 
 Client::Client(int fd) : fd(fd)
 {}
@@ -100,6 +102,7 @@ int Client::setHeader(void)
             {
                 headerline.setCompletion(true);
                 request.header = headerline.getHeader();
+                //여기서 header 오류 체크
                 break ;
             }
             if (headerline.plus(msg.substr(0, flag)) < 0)

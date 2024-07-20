@@ -18,6 +18,17 @@ std::vector<std::string>    manyHeaderInit()
     std::vector<std::string>    v;
 
     v.push_back("Accept");
+    v.push_back("Accept-Encoding");
+    v.push_back("Accept-Language");
+    v.push_back("sec-ch-ua");
+    return (v);
+}
+
+std::vector<std::string>    vitalHeaderInit()
+{
+    std::vector<std::string>    v;
+
+    v.push_back("Host");
     return (v);
 }
 
@@ -89,6 +100,11 @@ bool    HeaderLine::getCompletion() const
     return (completion);
 }
 
+ENTITYTYPE  HeaderLine::getEntitytype() const
+{
+    return (entitytype);
+}
+
 std::string HeaderLine::getKey() const
 {
     return (key);
@@ -119,7 +135,7 @@ int HeaderLine::plus(std::string temp)
     temp.erase(0, pos);
     pos = temp.find_last_not_of(' ');
     temp.erase(pos + 1);
-    if (temp.size() == 0)
+    if (temp.empty())
         return (-1);  //공백만 들어온 상황
     // if (temp[temp.size() - 1] == ',')
     //     temp.erase(temp.size() - 1);
@@ -135,7 +151,6 @@ int HeaderLine::plus(std::string temp)
         value.erase(pos + 1);
         // std::cout<<"key: "<<key;
         pushValue();
-        //header key가 여러 개 받을 수 있는 key인지 확인을 할 것 그래서 여러 개 받을 수 있다면 ,로 구분을 진행하고 그렇지 않다면 그냥 push
         // header[key].push_back(str);
     }
     else
@@ -144,6 +159,38 @@ int HeaderLine::plus(std::string temp)
             return (-2);  //message/htpp타입이 아닌데 obs-fold를 사용한 상황
         value = temp;
         pushValue();
+    }
+    return (0);
+}
+
+int HeaderLine::headerError()
+{
+    std::vector<std::string>::iterator                          itv;
+    std::map<std::string, std::vector<std::string> >::iterator  itm;
+
+    for (itv = vitalHeader.begin(); itv != vitalHeader.end(); itv++)
+    {
+        itm = header.find(*itv);
+        if (itm == header.end())
+            return (-1);
+    }
+    itm = header.find("Content-Length");
+    if (itm == header.end())
+    {
+        entitytype = TRANSFER;
+        itm = header.find("Transfer-Encoding");
+        if (itm == header.end())
+            entitytype = NOT;
+    }
+    else
+    {
+        entitytype = CONTENT;
+        itm = header.find("Transfer-Encoding");
+        if (itm != header.end())
+        {
+            entitytype = NOT;
+            return (-2);
+        }
     }
     return (0);
 }
