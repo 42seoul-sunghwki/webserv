@@ -132,7 +132,8 @@ int Client::setHeader(void)
                 //여기서 header 오류 체크
                 break ;
             }
-            if (headerline.plus(msg.substr(0, flag)) < 0)
+            str = msg.substr(0, flag);
+            if (headerline.plus(str) < 0)
                 return (-1);  //헤더 에러
             msg = msg.substr(flag + 2);
         }
@@ -144,59 +145,55 @@ int Client::setHeader(void)
 
 int Client::setEntityLine(void)
 {
-    std::string str;
+    if (message.size())
+    {
+        msg += message.back();
+        message.pop();
+    }
+    entityline.setEntity(msg, headerline.getEntitytype());
+    return (0);
+}
+
+int Client::setTe(void)
+{
     size_t      flag;
+    std::string str;
 
     if (message.size())
     {
         msg += message.back();
         message.pop();
     }
-    //te생각하기
-    if (headerline.getEntitytype() == CONTENT)
+    while (1)
     {
-        headerline.setContentLength(msg.size());
-        if (headerline.getContentLength() < 0)
-            return (-1);
-        else if (headerline.getContentLength() == 0)
-        {
-            entityline.setCompletion(true);
-        }
-        entityline.setEntity(msg);
-        msg.clear();        
-    }
-    else if (headerline.getEntitytype() == TRANSFER)
-    {
-        flag = msg.find("0\r\n\r\n");
+        if (msg.empty())
+            break ;
+        flag = msg.find("\r\n");
         if (flag != std::string::npos)
         {
-            entityline.setCompletion(true);
-            str = msg.substr(0, flag + 5);
-            entityline.setEntity(str);
-            msg = msg.substr(flag + 5);
+            str = msg.substr(0, flag);
+            if (headerline.checkTe(str) < 0)
+                return (-1);
+            msg = msg.substr(flag + 2);
         }
         else
-        {
-            entityline.setEntity(msg);
-            msg.clear();
-        }
+            break ;
     }
-    else
-    {
-        entityline.setEntity(msg);
-        return (0);
-    }
+    request.fin = true;
+    headerline.setTe(NOT);
+    return (0);
 }
+
 
 //temp(must delete)
 void    Client::showMessage(void)
 {
-    std::vector<std::string>::iterator  itv;
+    std::deque<std::string>::iterator  itv;
     //request 출력
     std::cout<<"=====strat line=====\n";
     std::cout<<request.method<<" "<<request.version<<" "<<request.url<<std::endl;
     std::cout<<"=====header line=====\n";
-    for (std::map<std::string, std::vector<std::string> >::iterator it = request.header.begin(); it != request.header.end(); it++)
+    for (std::map<std::string, std::deque<std::string> >::iterator it = request.header.begin(); it != request.header.end(); it++)
     {
         std::cout<<it->first<<": ";
         for (itv = request.header[it->first].begin(); itv != request.header[it->first].end(); itv++)
@@ -230,11 +227,13 @@ void    Client::setMessage(std::string str)
     }
     if (entityline.getCompletion() && headerline.getTe() == YES)
     {
-
+        if (setTe() < 0)
+            return ; 
     }
-    if (entityline.getCompletion() && headerline.getTe() == NOT)
+    if (entityline.getCompletion() && headerline.getTe() == NOT && message.empty())
     {
-        //fin OK로 바꾸기
+       request.fin = true;
     }
+    //message 남아있을 경우에 에러 처리하기
 }
 

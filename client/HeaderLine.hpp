@@ -14,6 +14,7 @@
 # define HEADERLINE_HPP
 
 # include <iostream>
+# include <deque>
 # include <vector>
 # include <map>
 # include <sstream>
@@ -41,8 +42,7 @@ class HeaderLine
         int         contentLength;
         std::string key;
         std::string value;
-        std::map<std::string, std::vector<std::string> > header;
-        std::vector<std::string>    teHeader;
+        std::map<std::string, std::deque<std::string> > header;
         bool    checkMime(std::string temp);
         int     pushValue();
     public:
@@ -59,12 +59,14 @@ class HeaderLine
         int         getContentLength() const;
         std::string getKey() const;
         std::string getValue() const;
-        std::map<std::string, std::vector<std::string> > getHeader() const;
+        std::map<std::string, std::deque<std::string> > getHeader() const;
         //set function
         void    setCompletion(bool temp);
         void    setContentLength(int minus);
+        void    setTe(TE temp);
         //logic
-        int plus(std::string temp);
+        int checkTe(std::string& temp);
+        int plus(std::string& temp);
         int headerError();
 };
 

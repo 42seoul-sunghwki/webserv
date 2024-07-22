@@ -26,7 +26,7 @@ typedef struct Request
     Method  method;
     Version version;
     std::string url;
-    std::map<std::string, std::vector<std::string> >  header;
+    std::map<std::string, std::deque<std::string> >  header;
 }   Request;
 
 class Client
@@ -61,6 +61,7 @@ class Client
         int     setHeaderUtil(std::string temp);
         int     setHeader(void);
         int     setEntityLine(void);
+        int     setTe(void);
         //temp(must delete)
         void    showMessage(void);
         void    setMessage(std::string str);

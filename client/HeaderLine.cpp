@@ -21,6 +21,7 @@ std::vector<std::string>    manyHeaderInit()
     v.push_back("Accept-Encoding");
     v.push_back("Accept-Language");
     v.push_back("sec-ch-ua");
+    v.push_back("Trailer");
     return (v);
 }
 
@@ -113,6 +114,11 @@ bool    HeaderLine::getCompletion() const
     return (completion);
 }
 
+TE  HeaderLine::getTe() const
+{
+    return (te);
+}
+
 ENTITYTYPE  HeaderLine::getEntitytype() const
 {
     return (entitytype);
@@ -132,7 +138,7 @@ std::string HeaderLine::getValue() const
 {
     return (value);
 }
-std::map<std::string, std::vector<std::string> > HeaderLine::getHeader() const
+std::map<std::string, std::deque<std::string> > HeaderLine::getHeader() const
 {
     return (header);
 }
@@ -147,7 +153,53 @@ void    HeaderLine::setContentLength(int minus)
     contentLength -= minus;
 }
 
-int HeaderLine::plus(std::string temp)
+void    HeaderLine::setTe(TE temp)
+{
+    te = temp;
+}
+
+int HeaderLine::checkTe(std::string &temp)
+{
+    size_t  pos;
+    size_t  colon;
+
+    pos = temp.find_first_not_of(' ');
+    temp.erase(0, pos);
+    pos = temp.find_last_not_of(' ');
+    temp.erase(pos + 1);
+    if (temp.empty())
+        return (-1);  //공백만 들어온 상황
+    //pop_front(): 앞쪽에서 요소를 제거합니다.
+    //front(): 앞쪽 요소를 반환합니다.
+    colon = temp.find(':');
+    if (colon != std::string::npos)
+    {
+        key = temp.substr(0, colon);
+        if (key != header["Trailer"].front())
+            return (-2);
+        header["Trailer"].pop_front();
+        value = temp.substr(colon + 1);
+        pos = value.find_first_not_of(' ');
+        value.erase(0, pos);
+        pos = value.find_last_not_of(' ');
+        value.erase(pos + 1);
+        // std::cout<<"key: "<<key;
+        if (pushValue() < 0)
+            return (-3);
+        // header[key].push_back(str);
+    }
+    else
+    {
+        if (key.size() == 0 && !checkMime(temp))
+            return (-2);  //message/htpp타입이 아닌데 obs-fold를 사용한 상황
+        value = temp;
+        if (pushValue() < 0)
+            return (-2);
+    }
+    return (0);
+}
+
+int HeaderLine::plus(std::string& temp)
 {
     std::string str;
     size_t      colon;
@@ -191,7 +243,7 @@ int HeaderLine::plus(std::string temp)
 int HeaderLine::headerError()
 {
     std::vector<std::string>::iterator                          itv;
-    std::map<std::string, std::vector<std::string> >::iterator  itm;
+    std::map<std::string, std::deque<std::string> >::iterator  itm;
 
     for (itv = vitalHeader.begin(); itv != vitalHeader.end(); itv++)
     {
